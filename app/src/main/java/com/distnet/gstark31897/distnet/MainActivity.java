@@ -2,8 +2,13 @@ package com.distnet.gstark31897.distnet;
 
 import android.app.Activity;
 import android.arch.persistence.room.Room;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.renderscript.ScriptGroup;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +41,7 @@ public class MainActivity extends AppCompatActivity
     MessageAdapter messageAdapter;
 
     AppDatabase database;
+    Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +73,8 @@ public class MainActivity extends AppCompatActivity
         for (Contact contact: database.contactDao().getAll())
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, contact.getIdentity());
 
-        //database.messageDao().insertAll(new Message("ident2", true, 0, "first message"));
+        //database.messageDao().insertAll(new Message("ident2", false, 1, "second message"));
+        //database.messageDao().insertAll(new Message("ident2", true, 2, "third message"));
         messageAdapter = new MessageAdapter(database);
 
         messageRecycler = (RecyclerView) findViewById(R.id.message_recycler);
@@ -77,9 +85,8 @@ public class MainActivity extends AppCompatActivity
         layoutManager.setReverseLayout(true);
         messageRecycler.setLayoutManager(layoutManager);
 
-        // Example of a call to a native method
-        //TextView tv = (TextView) findViewById(R.id.sample_text);
-        //tv.setText(stringFromJNI());
+        serviceIntent = new Intent(this, NodeService.class);
+        this.startService(serviceIntent);
     }
 
     @Override
@@ -126,6 +133,4 @@ public class MainActivity extends AppCompatActivity
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
         }
     }
-
-    public native String stringFromJNI();
 }
