@@ -3,15 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:id="@+id/contacts">
+    <group android:id="@+id/actions_group">
         <item
-            android:id="@+id/ident2"
-            android:title="ident2" />
+            android:id="@+id/add_contact"
+            android:icon="@drawable/ic_add"
+            android:title="Add Contact" />
     </group>
 
-    <item
-        android:id="@+id/add_contact"
-        android:icon="@drawable/ic_add"
-        android:title="Add Contact" />
-
+    <group android:id="@+id/contacts_group">
+    </group>
 </menu>
