@@ -2,9 +2,11 @@ package com.distnet.gstark31897.distnet;
 
 import android.app.Activity;
 import android.arch.persistence.room.Room;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -15,6 +17,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -37,6 +41,9 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
     RecyclerView messageRecycler;
     LinearLayoutManager layoutManager;
+
+    EditText messageEdit;
+    Button sendButton;
 
     MessageAdapter messageAdapter;
 
@@ -85,6 +92,29 @@ public class MainActivity extends AppCompatActivity
         layoutManager.setReverseLayout(true);
         messageRecycler.setLayoutManager(layoutManager);
 
+        messageEdit = (EditText) findViewById(R.id.message_edit);
+        sendButton = (Button) findViewById(R.id.send_button);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
+                intent.putExtra("type","send_msg");
+                ArrayList<String> args = new ArrayList<String>();
+                args.add(messageEdit.getText().toString());
+                sendBroadcast(intent);
+            }
+        });
+
+        IntentFilter filter = new IntentFilter("com.distnet.gstark31897.distnet.SERVICE");
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String value =  intent.getExtras().getString("value");
+                System.out.println("got the intent: " + value);
+            }
+        };
+        registerReceiver(receiver, filter);
+
         serviceIntent = new Intent(this, NodeService.class);
         this.startService(serviceIntent);
     }
@@ -130,6 +160,12 @@ public class MainActivity extends AppCompatActivity
             if (database.contactDao().countIdentity(newContact) > 0)
                 return;
             database.contactDao().insertAll(new Contact(newContact));
+            String args[] = new String[1];
+            args[0] = newContact;
+            Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
+            intent.putExtra("type","add_contact");
+            intent.putExtra("args", args);
+            sendBroadcast(intent);
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
         }
     }
