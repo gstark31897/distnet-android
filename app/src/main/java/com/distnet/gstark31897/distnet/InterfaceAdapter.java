@@ -20,8 +20,8 @@ public class InterfaceAdapter extends RecyclerView.Adapter<InterfaceAdapter.Inte
 
         public InterfaceViewHolder(View view) {
             super(view);
-            interfaceUri = (TextView) view.findViewById(R.id.message_layout);
-            deleteButton = (Button) view.findViewById(R.id.message_body);
+            interfaceUri = (TextView) view.findViewById(R.id.interface_uri);
+            deleteButton = (Button) view.findViewById(R.id.interface_delete);
         }
     }
 
@@ -31,8 +31,15 @@ public class InterfaceAdapter extends RecyclerView.Adapter<InterfaceAdapter.Inte
 
     @Override
     public void onBindViewHolder(InterfaceViewHolder holder, int position) {
-        Interface inter = database.interfaceDao().get(position);
+        final Interface inter = database.interfaceDao().get(position);
         holder.interfaceUri.setText(inter.getUri());
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                database.interfaceDao().delete(inter);
+                notifyDataSetChanged();
+            }
+        });
     }
 
     @Override

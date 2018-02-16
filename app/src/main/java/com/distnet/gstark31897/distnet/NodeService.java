@@ -51,6 +51,9 @@ public class NodeService extends Service {
         nodeStart(0, "ident");
         //nodeRun(0);
 
+
+        Toast.makeText(this, "creating node service", Toast.LENGTH_SHORT).show();
+
         //mServiceLooper = thread.getLooper();
         // start the service using the background handler
         //mServiceHandler = new ServiceHandler(mServiceLooper);
@@ -60,12 +63,14 @@ public class NodeService extends Service {
     public void onDestroy() {
         unregisterReceiver(receiver);
 
+        Toast.makeText(this, "destroying node service", Toast.LENGTH_SHORT).show();
+
         System.out.println("destroying intent");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Starting node service", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "on start node service", Toast.LENGTH_SHORT).show();
 
         // call a new service handler. The service ID can be used to identify the service
         //android.os.Message message = mServiceHandler.obtainMessage();

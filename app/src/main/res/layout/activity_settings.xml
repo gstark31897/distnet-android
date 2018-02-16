@@ -19,26 +19,52 @@
             android:text="@string/interfaces_label"/>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/message_recycler"
+            android:id="@+id/interface_recycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_columnSpan="2"
             android:scrollbars="vertical" />
 
-        <TextView
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_horizontal"
-            android:layout_weight="1"
+            android:layout_columnWeight="1"
             android:padding="10dp"
-            android:id="@+id/interface_uri" />
+            android:id="@+id/interface_input" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:id="@+id/delete_button"
-            android:text="@string/button_delete" />
+            android:id="@+id/interface_submit"
+            android:text="@string/button_add" />
+
+        <TextView
+            android:layout_gravity="fill_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnSpan="2"
+            android:text="@string/peers_label"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/peer_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_columnSpan="2"
+            android:scrollbars="vertical" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:layout_columnWeight="1"
+            android:padding="10dp"
+            android:id="@+id/peer_input" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/peer_submit"
+            android:text="@string/button_add" />
     </GridLayout>
 </android.support.constraint.ConstraintLayout>

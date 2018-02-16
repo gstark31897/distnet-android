@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity
 
     public static final String NEW_CONTACT_IDENTITY = "com.example.myfirstapp.NEW_CONTACT_IDENTITY";
     public static final int NEW_CONTACT_REQUEST_CODE = 0;
+    public static final int SETTINGS_REQUEST_CODE = 1;
 
     NavigationView navigationView;
     RecyclerView messageRecycler;
@@ -49,6 +50,9 @@ public class MainActivity extends AppCompatActivity
 
     AppDatabase database;
     Intent serviceIntent;
+
+    IntentFilter filter;
+    BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,8 +109,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        IntentFilter filter = new IntentFilter("com.distnet.gstark31897.distnet.SERVICE");
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        filter = new IntentFilter("com.distnet.gstark31897.distnet.SERVICE");
+        receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String value =  intent.getExtras().getString("value");
@@ -130,6 +134,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(intent, SETTINGS_REQUEST_CODE);
             return true;
         }
 
@@ -160,13 +166,20 @@ public class MainActivity extends AppCompatActivity
             if (database.contactDao().countIdentity(newContact) > 0)
                 return;
             database.contactDao().insertAll(new Contact(newContact));
-            String args[] = new String[1];
-            args[0] = newContact;
+            ArrayList<String> args = new ArrayList<String>();
+            args.add(newContact);
             Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
             intent.putExtra("type","add_contact");
             intent.putExtra("args", args);
             sendBroadcast(intent);
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
         }
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 }

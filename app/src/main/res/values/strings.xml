@@ -8,9 +8,11 @@
 
     <string name="button_send">Send</string>
     <string name="button_delete">Delete</string>
+    <string name="button_add">Add</string>
 
     <string name="identity_input_label">Identity:</string>
     <string name="identity_input_submit">Add Contact</string>
 
     <string name="interfaces_label">Interfaces:</string>
+    <string name="peers_label">Peers:</string>
 </resources>
