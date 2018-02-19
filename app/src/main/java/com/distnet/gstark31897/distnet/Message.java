@@ -2,6 +2,7 @@ package com.distnet.gstark31897.distnet;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity(tableName = "messages")
@@ -15,18 +16,22 @@ public class Message {
     @ColumnInfo(name = "outgoing")
     private boolean outgoing;
 
-    @ColumnInfo(name = "pos")
-    private int pos;
-
     @ColumnInfo(name = "body")
     private String body;
 
+    @ColumnInfo(name = "time")
+    private long time;
 
-    public Message(String contact, boolean outgoing, int pos, String body) {
+    @Ignore
+    public Message(String contact, boolean outgoing, String body) {
+        this(contact, outgoing, body, System.currentTimeMillis());
+    }
+
+    public Message(String contact, boolean outgoing, String body, long time) {
         this.contact = contact;
         this.outgoing = outgoing;
-        this.pos = pos;
         this.body = body;
+        this.time = time;
     }
 
     public int getId()
@@ -59,16 +64,6 @@ public class Message {
         this.outgoing = outgoing;
     }
 
-    public int getPos()
-    {
-        return pos;
-    }
-
-    public void setPos(int pos)
-    {
-        this.pos = pos;
-    }
-
     public String getBody()
     {
         return body;
@@ -77,5 +72,15 @@ public class Message {
     public void setBody(String body)
     {
         this.body = body;
+    }
+
+    public long getTime()
+    {
+        return time;
+    }
+
+    public void setTime(long time)
+    {
+        this.time = time;
     }
 }

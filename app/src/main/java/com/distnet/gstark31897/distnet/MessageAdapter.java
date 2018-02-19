@@ -33,6 +33,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         this.database = database;
     }
 
+    public String getContact() {
+        return contact;
+    }
+
     public void setContact(String contact) {
         this.contact = contact;
         notifyDataSetChanged();

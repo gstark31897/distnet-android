@@ -16,8 +16,8 @@ public interface MessageDao {
     @Query("SELECT COUNT(id) FROM messages WHERE contact = :contact")
     int countMessages(String contact);
 
-    @Query("SELECT * FROM messages WHERE contact = :contact AND pos = :pos")
-    Message getMessage(String contact, int pos);
+    @Query("SELECT * FROM messages WHERE contact = :contact ORDER BY time DESC LIMIT 1 OFFSET :i")
+    Message getMessage(String contact, int i);
 
     @Insert
     void insertAll(Message... messages);

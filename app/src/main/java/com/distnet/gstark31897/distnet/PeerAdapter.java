@@ -11,9 +11,6 @@ public class PeerAdapter extends RecyclerView.Adapter<PeerAdapter.PeerViewHolder
 
     private AppDatabase database;
 
-    /**
-     * View holder class
-     * */
     public class PeerViewHolder extends RecyclerView.ViewHolder {
         public TextView peerUri;
         public Button peerDelete;

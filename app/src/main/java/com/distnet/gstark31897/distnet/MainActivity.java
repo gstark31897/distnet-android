@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.renderscript.ScriptGroup;
@@ -51,6 +52,8 @@ public class MainActivity extends AppCompatActivity
     AppDatabase database;
     Intent serviceIntent;
 
+    SharedPreferences settings;
+
     IntentFilter filter;
     BroadcastReceiver receiver;
 
@@ -60,15 +63,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -84,10 +78,7 @@ public class MainActivity extends AppCompatActivity
         for (Contact contact: database.contactDao().getAll())
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, contact.getIdentity());
 
-        //database.messageDao().insertAll(new Message("ident2", false, 1, "second message"));
-        //database.messageDao().insertAll(new Message("ident2", true, 2, "third message"));
         messageAdapter = new MessageAdapter(database);
-
         messageRecycler = (RecyclerView) findViewById(R.id.message_recycler);
         messageRecycler.setAdapter(messageAdapter);
 
@@ -101,20 +92,36 @@ public class MainActivity extends AppCompatActivity
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (messageEdit.getText().toString().length() == 0)
+                    return;
+
+                ArrayList<String> args = new ArrayList<String>();
+                args.add(messageAdapter.getContact());
+                args.add(messageEdit.getText().toString());
+
                 Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
                 intent.putExtra("type","send_msg");
-                ArrayList<String> args = new ArrayList<String>();
-                args.add(messageEdit.getText().toString());
+                intent.putExtra("args", args);
                 sendBroadcast(intent);
+                messageEdit.setText("");
             }
         });
+
+        settings = getSharedPreferences("distnet", 0);
+        String currentContact = settings.getString("currentContact", "");
+        if (currentContact.length() != 0)
+            switchContact(currentContact);
 
         filter = new IntentFilter("com.distnet.gstark31897.distnet.SERVICE");
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String value =  intent.getExtras().getString("value");
-                System.out.println("got the intent: " + value);
+                String type =  intent.getExtras().getString("type");
+                System.out.println("got the intent: " + type);
+
+                if (type.equals("msg_update")) {
+                    messageAdapter.notifyDataSetChanged();
+                }
             }
         };
         registerReceiver(receiver, filter);
@@ -148,7 +155,7 @@ public class MainActivity extends AppCompatActivity
         int gid = item.getGroupId();
 
         if (gid == R.id.contacts_group) {
-            messageAdapter.setContact(item.getTitle().toString());
+            switchContact(item.getTitle().toString());
         } else if (id == R.id.add_contact) {
             Intent intent = new Intent(this, NewContactActivity.class);
             startActivityForResult(intent, NEW_CONTACT_REQUEST_CODE);
@@ -157,6 +164,15 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void switchContact(String contact) {
+        setTitle(contact);
+        messageAdapter.setContact(contact);
+
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("currentContact", contact);
+        editor.commit();
     }
 
     @Override
@@ -175,10 +191,8 @@ public class MainActivity extends AppCompatActivity
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
         }
     }
-
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
     }
