@@ -17,6 +17,8 @@ public class NewContactActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_contatct);
 
+        setTitle(R.string.new_contact_title);
+
         identityInput = (EditText)findViewById(R.id.identity_input);
         submitButton = (Button)findViewById(R.id.identity_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {

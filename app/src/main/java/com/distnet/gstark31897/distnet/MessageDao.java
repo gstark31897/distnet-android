@@ -19,6 +19,9 @@ public interface MessageDao {
     @Query("SELECT * FROM messages WHERE contact = :contact ORDER BY time DESC LIMIT 1 OFFSET :i")
     Message getMessage(String contact, int i);
 
+    @Query("DELETE FROM messages WHERE contact = :contact")
+    void remove(String contact);
+
     @Insert
     void insertAll(Message... messages);
 

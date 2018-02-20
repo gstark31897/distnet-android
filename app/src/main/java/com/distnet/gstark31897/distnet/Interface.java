@@ -12,9 +12,12 @@ public class Interface {
     @ColumnInfo(name = "uri")
     private String uri;
 
+    @ColumnInfo(name = "permanent")
+    private boolean permanent;
 
-    public Interface(String uri) {
+    public Interface(String uri, boolean permanent) {
         this.uri = uri;
+        this.permanent = permanent;
     }
 
     public int getId()
@@ -35,5 +38,13 @@ public class Interface {
     public void setUri(String uri)
     {
         this.uri = uri;
+    }
+
+    public boolean getPermanent() {
+        return permanent;
+    }
+
+    public void setPermanent(boolean permanent) {
+        this.permanent = permanent;
     }
 }

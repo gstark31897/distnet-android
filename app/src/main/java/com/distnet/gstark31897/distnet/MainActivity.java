@@ -1,18 +1,17 @@
 package com.distnet.gstark31897.distnet;
 
+import android.Manifest;
 import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.renderscript.ScriptGroup;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,18 +19,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -52,6 +45,7 @@ public class MainActivity extends AppCompatActivity
     AppDatabase database;
     Intent serviceIntent;
 
+    String identity;
     SharedPreferences settings;
 
     IntentFilter filter;
@@ -61,6 +55,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setTitle(R.string.app_name);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -95,22 +92,23 @@ public class MainActivity extends AppCompatActivity
                 if (messageEdit.getText().toString().length() == 0)
                     return;
 
-                ArrayList<String> args = new ArrayList<String>();
-                args.add(messageAdapter.getContact());
-                args.add(messageEdit.getText().toString());
+                makeIntent("send_msg", messageAdapter.getContact(), messageEdit.getText().toString());
 
-                Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
-                intent.putExtra("type","send_msg");
-                intent.putExtra("args", args);
-                sendBroadcast(intent);
                 messageEdit.setText("");
             }
         });
 
         settings = getSharedPreferences("distnet", 0);
+        String identity = settings.getString("identity", "");
+        if (identity.length() == 0) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(intent, SETTINGS_REQUEST_CODE);
+        }
+
         String currentContact = settings.getString("currentContact", "");
-        if (currentContact.length() != 0)
+        if (currentContact.length() != 0) {
             switchContact(currentContact);
+        }
 
         filter = new IntentFilter("com.distnet.gstark31897.distnet.SERVICE");
         receiver = new BroadcastReceiver() {
@@ -144,6 +142,12 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivityForResult(intent, SETTINGS_REQUEST_CODE);
             return true;
+        } else if (id == R.id.action_remove_contact) {
+            database.contactDao().remove(messageAdapter.getContact());
+            database.messageDao().remove(messageAdapter.getContact());
+            switchContact("");
+            recreate();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -172,7 +176,7 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("currentContact", contact);
-        editor.commit();
+        editor.apply();
     }
 
     @Override
@@ -182,15 +186,30 @@ public class MainActivity extends AppCompatActivity
             if (database.contactDao().countIdentity(newContact) > 0)
                 return;
             database.contactDao().insertAll(new Contact(newContact));
-            ArrayList<String> args = new ArrayList<String>();
-            args.add(newContact);
-            Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
-            intent.putExtra("type","add_contact");
-            intent.putExtra("args", args);
-            sendBroadcast(intent);
+
+            makeIntent("add_contact", newContact);
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
+
+            switchContact(newContact);
+        } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            identity = settings.getString("identity", "");
+            makeIntent("set_identity", identity);
         }
     }
+
+    public void makeIntent(String type, String... args)
+    {
+        ArrayList<String> argList = new ArrayList<String>();
+        for (String arg: args) {
+            argList.add(arg);
+        }
+
+        Intent intent = new Intent("com.distnet.gstark31897.distnet.ACTIVITY");
+        intent.putExtra("type", type);
+        intent.putExtra("args", argList);
+        sendBroadcast(intent);
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();

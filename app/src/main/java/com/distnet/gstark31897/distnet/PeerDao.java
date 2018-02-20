@@ -10,7 +10,7 @@ import java.util.List;
 @Dao
 public interface PeerDao {
     @Query("SELECT * FROM peers")
-    List<Interface> getAll();
+    List<Peer> getAll();
 
     @Query("SELECT COUNT(id) FROM peers")
     int count();

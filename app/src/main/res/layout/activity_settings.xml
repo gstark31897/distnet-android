@@ -11,6 +11,20 @@
         android:layout_height="match_parent"
         android:columnCount="2">
 
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:layout_columnWeight="1"
+            android:padding="10dp"
+            android:id="@+id/identity_input" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/identity_submit"
+            android:text="@string/button_update" />
+
         <TextView
             android:layout_gravity="fill_horizontal"
             android:layout_width="wrap_content"

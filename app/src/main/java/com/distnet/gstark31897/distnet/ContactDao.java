@@ -21,6 +21,9 @@ public interface ContactDao {
     @Query("SELECT * FROM contacts WHERE identity = :identity")
     Contact getContact(String identity);
 
+    @Query("DELETE FROM contacts WHERE identity = :identity")
+    void remove(String identity);
+
     @Insert
     void insertAll(Contact... contacts);
 
