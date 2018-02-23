@@ -18,6 +18,9 @@ public interface InterfaceDao {
     @Query("SELECT * FROM interfaces LIMIT 1 OFFSET :i")
     Interface get(int i);
 
+    @Query("DELETE FROM interfaces WHERE uri == :uri")
+    void remove(String uri);
+
     @Query("DELETE FROM interfaces WHERE permanent == 0")
     void deleteTemporary();
 

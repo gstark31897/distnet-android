@@ -34,6 +34,8 @@ public class NodeService extends Service {
                     setIdentity(args.get(0));
                 } else if (type.equals("add_interface")) {
                     addInterface(args.get(0));
+                } else if (type.equals("remove_interface")) {
+                    removeInterface(args.get(0));
                 } else if (type.equals("add_peer")) {
                     addPeer(args.get(0));
                 } else if (type.equals("discover")) {
@@ -135,8 +137,17 @@ public class NodeService extends Service {
         nodeAddInterface(0, uri);
     }
 
-    public void interfaceCallback(String uri) {
-        database.interfaceDao().insertAll(new Interface(uri, false));
+    public void removeInterface(String uri) {
+        nodeRemoveInterface(0, uri);
+    }
+
+    public void interfaceCallback(String uri, boolean add) {
+        System.out.println("interface cb");
+        if (add) {
+            database.interfaceDao().insertAll(new Interface(uri, false));
+        } else {
+            database.interfaceDao().remove(uri);
+        }
         makeIntent("interface_update");
     }
 
@@ -150,6 +161,7 @@ public class NodeService extends Service {
     public native void nodeRun(int node_id);
     public native void nodeSetIdentity(int node_id, String identity);
     public native void nodeAddInterface(int node_id, String uri);
+    public native void nodeRemoveInterface(int node_id, String uri);
     public native void nodeAddPeer(int node_id, String uri);
     public native void nodeDiscover(int node_id, String identity);
     public native void nodeSendMsg(int node_id, String identity, String message);

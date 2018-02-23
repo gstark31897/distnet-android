@@ -71,7 +71,7 @@ public class SettingsActivity extends AppCompatActivity {
                 interfaceInput.setText("");
             }
         });
-        interfaceAdapter = new InterfaceAdapter(database);
+        interfaceAdapter = new InterfaceAdapter(database, this);
         interfaceRecycler = (RecyclerView) findViewById(R.id.interface_recycler);
         interfaceRecycler.setAdapter(interfaceAdapter);
         interfaceLayoutManager = new LinearLayoutManager(this);

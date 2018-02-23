@@ -12,6 +12,7 @@
 
     <string name="button_send">Send</string>
     <string name="button_delete">Delete</string>
+    <string name="button_remove">Remove</string>
     <string name="button_add">Add</string>
     <string name="button_update">Update</string>
 
