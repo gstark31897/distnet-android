@@ -20,6 +20,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorMessage"
         android:orientation="horizontal">
 
         <EditText
@@ -32,8 +33,9 @@
 
         <Button
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="fill_vertical"
+            android:background="@color/colorMessage"
             android:id="@+id/send_button"
             android:text="@string/button_send" />
     </LinearLayout>
