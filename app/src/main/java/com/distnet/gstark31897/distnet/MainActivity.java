@@ -72,8 +72,10 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        for (Contact contact: database.contactDao().getAll())
+        for (Contact contact: database.contactDao().getAll()) {
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, contact.getIdentity());
+            makeIntent("discover", contact.getIdentity());
+        }
 
         messageAdapter = new MessageAdapter(database);
         messageRecycler = (RecyclerView) findViewById(R.id.message_recycler);
@@ -174,6 +176,8 @@ public class MainActivity extends AppCompatActivity
         setTitle(contact);
         messageAdapter.setContact(contact);
 
+        makeIntent("discover", contact);
+
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("currentContact", contact);
         editor.apply();
@@ -189,6 +193,7 @@ public class MainActivity extends AppCompatActivity
 
             makeIntent("add_contact", newContact);
             navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
+            makeIntent("discover", newContact);
 
             switchContact(newContact);
         } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
