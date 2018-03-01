@@ -1,5 +1,8 @@
 package com.distnet.gstark31897.distnet;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
@@ -7,6 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.*;
 
 import java.util.ArrayList;
@@ -18,8 +24,28 @@ public class NodeService extends Service {
     private NodeRunner runner;
     BroadcastReceiver receiver;
 
+    boolean showNotification = false;
+
+    NotificationChannel notificationChannel;
+
     @Override
     public void onCreate() {
+        Uri alarmSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.ringtone);
+        AudioAttributes att = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build();
+
+        NotificationChannel notificationChannel = new NotificationChannel("messages", "distnet", NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel.enableLights(true);
+        notificationChannel.setLightColor(Color.CYAN);
+        notificationChannel.enableVibration(true);
+        notificationChannel.setVibrationPattern(new long[]{0, 75, 25, 75, 150, 150});
+        notificationChannel.setSound(alarmSound, att);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(notificationChannel);
+
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database")
                 .allowMainThreadQueries().fallbackToDestructiveMigration().build();
 
@@ -29,8 +55,9 @@ public class NodeService extends Service {
             public void onReceive(Context context, Intent intent) {
                 String type =  intent.getExtras().getString("type");
                 ArrayList<String> args = intent.getStringArrayListExtra("args");
-
-                if (type.equals("set_identity")) {
+                if (type.equals("main_activity")) {
+                    mainActivity(args.get(0));
+                } else if (type.equals("set_identity")) {
                     setIdentity(args.get(0));
                 } else if (type.equals("add_interface")) {
                     addInterface(args.get(0));
@@ -113,6 +140,14 @@ public class NodeService extends Service {
         sendBroadcast(intent);
     }
 
+    public void mainActivity(String status) {
+        if (status.equals("open")) {
+            showNotification = false;
+        } else {
+            showNotification = true;
+        }
+    }
+
     public void setIdentity(String identity) {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("identity", identity);
@@ -129,6 +164,19 @@ public class NodeService extends Service {
     public void messageCallback(String sender, String message) {
         database.messageDao().insertAll(new Message(sender, false, message));
         makeIntent("msg_update");
+
+        if (!showNotification)
+            return;
+
+        Notification n  = new Notification.Builder(this)
+                .setContentTitle(sender)
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setChannelId("messages").build();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0, n);
     }
 
     public void addInterface(String uri) {

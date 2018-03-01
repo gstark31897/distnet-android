@@ -1,6 +1,5 @@
 package com.distnet.gstark31897.distnet;
 
-import android.Manifest;
 import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
@@ -8,10 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -85,6 +82,12 @@ public class MainActivity extends AppCompatActivity
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         layoutManager.setReverseLayout(true);
         messageRecycler.setLayoutManager(layoutManager);
+        messageRecycler.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                messageRecycler.scrollToPosition(0);
+            }
+        });
 
         messageEdit = (EditText) findViewById(R.id.message_edit);
         sendButton = (Button) findViewById(R.id.send_button);
@@ -121,6 +124,7 @@ public class MainActivity extends AppCompatActivity
 
                 if (type.equals("msg_update")) {
                     messageAdapter.notifyDataSetChanged();
+                    messageRecycler.scrollToPosition(0);
                 }
             }
         };
@@ -216,8 +220,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        makeIntent("main_activity", "open");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        makeIntent("main_activity", "close");
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        makeIntent("main_activity", "close");
         unregisterReceiver(receiver);
     }
 }
