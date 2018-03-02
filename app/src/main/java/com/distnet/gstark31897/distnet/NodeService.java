@@ -3,6 +3,7 @@ package com.distnet.gstark31897.distnet;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
@@ -16,6 +17,8 @@ import android.net.Uri;
 import android.os.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NodeService extends Service {
     AppDatabase database;
@@ -27,6 +30,10 @@ public class NodeService extends Service {
     boolean showNotification = false;
 
     NotificationChannel notificationChannel;
+    NotificationManager notificationManager;
+    String currentContact = "";
+    int currentNotification = 0;
+    Map<String, Integer> activeNotifications;
 
     @Override
     public void onCreate() {
@@ -36,26 +43,49 @@ public class NodeService extends Service {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build();
 
-        NotificationChannel notificationChannel = new NotificationChannel("messages", "distnet", NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel = new NotificationChannel("messages", "distnet", NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.CYAN);
         notificationChannel.enableVibration(true);
         notificationChannel.setVibrationPattern(new long[]{0, 75, 25, 75, 150, 150});
         notificationChannel.setSound(alarmSound, att);
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(notificationChannel);
+        activeNotifications = new HashMap<>();
 
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database")
                 .allowMainThreadQueries().fallbackToDestructiveMigration().build();
+
+        settings = getSharedPreferences("distnet", 0);
+
+        System.loadLibrary("distnet-core");
+        nodeStart(0, settings.getString("identity", ""));
+
+        database.interfaceDao().deleteTemporary();
+
+        for (Interface inter: database.interfaceDao().getAll()) {
+            nodeAddInterface(0, inter.getUri());
+        }
+
+        for (Peer peer: database.peerDao().getAll()) {
+            nodeAddPeer(0, peer.getUri());
+        }
+
+        runner = new NodeRunner();
+        runner.start();
 
         IntentFilter filter = new IntentFilter("com.distnet.gstark31897.distnet.ACTIVITY");
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (intent.getExtras() == null) {
+                    return;
+                }
                 String type =  intent.getExtras().getString("type");
                 ArrayList<String> args = intent.getStringArrayListExtra("args");
-                if (type.equals("main_activity")) {
+                if (type == null || args == null) {
+                    return;
+                } else if (type.equals("main_activity")) {
                     mainActivity(args.get(0));
                 } else if (type.equals("set_identity")) {
                     setIdentity(args.get(0));
@@ -75,26 +105,6 @@ public class NodeService extends Service {
             }
         };
         registerReceiver(receiver, filter);
-
-        settings = getSharedPreferences("distnet", 0);
-
-        System.loadLibrary("distnet-core");
-        nodeStart(0, settings.getString("identity", ""));
-
-        database.interfaceDao().deleteTemporary();
-
-        System.out.println("adding interfaces");
-        for (Interface inter: database.interfaceDao().getAll()) {
-            nodeAddInterface(0, inter.getUri());
-        }
-
-        System.out.println("adding peers");
-        for (Peer peer: database.peerDao().getAll()) {
-            nodeAddPeer(0, peer.getUri());
-        }
-
-        runner = new NodeRunner();
-        runner.start();
     }
 
     @Override
@@ -143,6 +153,8 @@ public class NodeService extends Service {
     public void mainActivity(String status) {
         if (status.equals("open")) {
             showNotification = false;
+            notificationManager.cancelAll();
+            activeNotifications.clear();
         } else {
             showNotification = true;
         }
@@ -168,15 +180,22 @@ public class NodeService extends Service {
         if (!showNotification)
             return;
 
+        int id = 0;
+        if (activeNotifications.containsKey(sender)) {
+            id = activeNotifications.get(sender).intValue();
+        } else {
+            id = currentNotification++;
+        }
+        PendingIntent notificationIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         Notification n  = new Notification.Builder(this)
                 .setContentTitle(sender)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setChannelId("messages").build();
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        notificationManager.notify(0, n);
+                .setChannelId("messages")
+                .setContentIntent(notificationIntent).build();
+        notificationManager.notify(id, n);
+        activeNotifications.put(sender, id);
     }
 
     public void addInterface(String uri) {

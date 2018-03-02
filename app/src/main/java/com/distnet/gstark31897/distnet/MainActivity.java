@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        serviceIntent = new Intent(this, NodeService.class);
+        this.startService(serviceIntent);
 
         setTitle(R.string.app_name);
 
@@ -129,9 +133,6 @@ public class MainActivity extends AppCompatActivity
             }
         };
         registerReceiver(receiver, filter);
-
-        serviceIntent = new Intent(this, NodeService.class);
-        this.startService(serviceIntent);
     }
 
     @Override
