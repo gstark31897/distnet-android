@@ -2,6 +2,7 @@
     <string name="app_name">distnet</string>
 
     <string name="new_contact_title">New Contact</string>
+    <string name="share_contact_title">Share Contact</string>
     <string name="settings_title">Settings</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -15,6 +16,9 @@
     <string name="button_remove">Remove</string>
     <string name="button_add">Add</string>
     <string name="button_update">Update</string>
+    <string name="button_scan_qr_code">Scan QR Code</string>
+    <string name="button_open_qr_code">Open QR Code Image</string>
+    <string name="button_share_qr_code">Share</string>
 
     <string name="identity_input_label">Identity:</string>
     <string name="identity_input_submit">Add Contact</string>

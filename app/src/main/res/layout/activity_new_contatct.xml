@@ -31,6 +31,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_columnSpan="2"
+            android:text="@string/button_scan_qr_code"
+            android:id="@+id/scan_qr_code" />
+
+        <Button
+            android:layout_gravity="fill_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnSpan="2"
+            android:text="@string/button_open_qr_code"
+            android:id="@+id/open_qr_code" />
+
+        <Button
+            android:layout_gravity="fill_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnSpan="2"
             android:text="@string/identity_input_submit"
             android:id="@+id/identity_submit" />
     </GridLayout>
