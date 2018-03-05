@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -170,6 +169,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.add_contact) {
             Intent intent = new Intent(this, NewContactActivity.class);
             startActivityForResult(intent, NEW_CONTACT_REQUEST_CODE);
+        } else if (id == R.id.share_contact) {
+            Intent intent = new Intent(this, ShareContactActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
