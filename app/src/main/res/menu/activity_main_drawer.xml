@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:id="@+id/actions_group">
+        <item
+            android:id="@+id/add_contact"
+            android:icon="@drawable/ic_add"
+            android:title="Add Contact" />
+    </group>
+
+    <group android:id="@+id/contacts_group">
+    </group>
+</menu>
