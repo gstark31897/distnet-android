@@ -12,9 +12,13 @@ public class Contact {
     @ColumnInfo(name = "identity")
     private String identity;
 
+    @ColumnInfo(name = "nickname")
+    private String nickname;
 
-    public Contact(String identity) {
+
+    public Contact(String identity, String nickname) {
         this.identity = identity;
+        this.nickname = nickname;
     }
 
     public int getId()
@@ -35,5 +39,15 @@ public class Contact {
     public void setIdentity(String identity)
     {
         this.identity = identity;
+    }
+
+    public String getNickname()
+    {
+        return nickname;
+    }
+
+    public void setNickname(String nickname)
+    {
+        this.nickname = nickname;
     }
 }

@@ -56,10 +56,25 @@ public class NodeService extends Service {
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database")
                 .allowMainThreadQueries().fallbackToDestructiveMigration().build();
 
-        settings = getSharedPreferences("distnet", 0);
-
         System.loadLibrary("distnet-core");
-        nodeStart(0, settings.getString("identity", ""));
+        System.loadLibrary("sodium");
+
+        settings = getSharedPreferences("distnet", 0);
+        String public_key = settings.getString("public_key", "");
+        String secret_key = settings.getString("secret_key", "");
+        System.out.println("public key: " + public_key);
+        System.out.println("secret key: " + secret_key);
+        if (public_key.length() == 0 || secret_key.length() == 0) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            String key[] = generateKeypair().split(":");
+            public_key = key[0];
+            secret_key = key[1];
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("public_key", public_key);
+            editor.putString("secret_key", secret_key);
+            editor.commit();
+        }
+        nodeStart(0, public_key, secret_key);
 
         database.interfaceDao().deleteTemporary();
 
@@ -88,7 +103,7 @@ public class NodeService extends Service {
                 } else if (type.equals("main_activity")) {
                     mainActivity(args.get(0));
                 } else if (type.equals("set_identity")) {
-                    setIdentity(args.get(0));
+                    setIdentity(args.get(0), args.get(1));
                 } else if (type.equals("add_interface")) {
                     addInterface(args.get(0));
                 } else if (type.equals("remove_interface")) {
@@ -160,11 +175,12 @@ public class NodeService extends Service {
         }
     }
 
-    public void setIdentity(String identity) {
+    public void setIdentity(String publicKey, String secretKey) {
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("identity", identity);
+        editor.putString("public_key", publicKey);
+        editor.putString("secret_key", secretKey);
         editor.commit();
-        nodeSetIdentity(0, identity);
+        nodeSetIdentity(0, publicKey, secretKey);
     }
 
     public void sendMessage(String identity, String message) {
@@ -224,13 +240,14 @@ public class NodeService extends Service {
         nodeAddPeer(0, uri);
     }
 
-    public native void nodeStart(int node_id, String identity);
+    public native void nodeStart(int node_id, String public_key, String secret_key);
     public native void nodeRun(int node_id);
-    public native void nodeSetIdentity(int node_id, String identity);
+    public native void nodeSetIdentity(int node_id, String public_key, String secret_key);
     public native void nodeAddInterface(int node_id, String uri);
     public native void nodeRemoveInterface(int node_id, String uri);
     public native void nodeAddPeer(int node_id, String uri);
     public native void nodeDiscover(int node_id, String identity);
     public native void nodeSendMsg(int node_id, String identity, String message);
     public native void nodeStop(int node_id);
+    public native String generateKeypair();
 }

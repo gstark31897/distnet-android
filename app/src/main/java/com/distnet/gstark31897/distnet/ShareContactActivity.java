@@ -23,6 +23,7 @@ public class ShareContactActivity extends AppCompatActivity {
     final int PERMISSION_CODE = 0;
 
     SharedPreferences settings;
+    String nickname;
     String identity;
     Button shareButton;
 
@@ -36,7 +37,10 @@ public class ShareContactActivity extends AppCompatActivity {
         setTitle(R.string.share_contact_title);
 
         settings = getSharedPreferences("distnet", 0);
-        identity = settings.getString("identity", "");
+        nickname = settings.getString("nickname", "");
+        identity = settings.getString("public_key", "");
+
+        String shareString = nickname + ":" + identity;
 
         try {
             Display display = getWindowManager().getDefaultDisplay();
@@ -44,7 +48,7 @@ public class ShareContactActivity extends AppCompatActivity {
             display.getSize(size);
 
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-            bitmap = barcodeEncoder.encodeBitmap(identity, BarcodeFormat.QR_CODE, display.getWidth(), display.getWidth());
+            bitmap = barcodeEncoder.encodeBitmap(shareString, BarcodeFormat.QR_CODE, display.getWidth(), display.getWidth());
             ImageView imageViewQrCode = (ImageView) findViewById(R.id.qr_code_display);
             imageViewQrCode.setImageBitmap(bitmap);
         } catch (WriterException e) {
