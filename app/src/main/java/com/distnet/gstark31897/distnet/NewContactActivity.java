@@ -3,7 +3,6 @@ package com.distnet.gstark31897.distnet;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BinaryBitmap;
@@ -26,18 +26,18 @@ import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class NewContactActivity extends AppCompatActivity {
     final int SELECT_FILE_CODE = 0;
 
-    EditText identityInput;
+    EditText nicknameInput;
+    TextView identityDisplay;
     Button submitButton;
     Button scanQrCodeButton;
     Button openQrCodeButton;
+
+    String newIdentity;
 
     IntentIntegrator integrator;
 
@@ -48,13 +48,14 @@ public class NewContactActivity extends AppCompatActivity {
 
         setTitle(R.string.new_contact_title);
 
-        identityInput = (EditText)findViewById(R.id.identity_input);
-        submitButton = (Button)findViewById(R.id.identity_submit);
+        nicknameInput = (EditText)findViewById(R.id.nickname_input);
+        submitButton = (Button)findViewById(R.id.contact_submit);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
-                intent.putExtra(MainActivity.NEW_CONTACT_IDENTITY, identityInput.getText().toString());
+                intent.putExtra(MainActivity.NEW_CONTACT_IDENTITY, newIdentity);
+                intent.putExtra(MainActivity.NEW_CONTACT_NICKNAME, nicknameInput.getText().toString());
                 setResult(Activity.RESULT_OK, intent);
                 finish();
             }
@@ -100,8 +101,7 @@ public class NewContactActivity extends AppCompatActivity {
                 if(result.getContents() == null) {
                     Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                    identityInput.setText(result.getContents());
+                    readData(result.getContents());
                 }
             }
         } else {
@@ -120,7 +120,7 @@ public class NewContactActivity extends AppCompatActivity {
 
             Reader reader = new MultiFormatReader();
             Result result = reader.decode(binaryBitmap);
-            identityInput.setText(result.getText());
+            readData(result.getText());
         } catch (IOException e) {
             Toast.makeText(this, "Unable to load image", Toast.LENGTH_LONG).show();
         } catch (FormatException e) {
@@ -130,5 +130,14 @@ public class NewContactActivity extends AppCompatActivity {
         } catch (NotFoundException e) {
             Toast.makeText(this, "Unable to decode QR code", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void readData(String data) {
+        Toast.makeText(this, "Scanned: " + data, Toast.LENGTH_LONG).show();
+        String args[] = data.split(":");
+        if (args.length != 2)
+            return;
+        nicknameInput.setText(args[0]);
+        newIdentity = args[1];
     }
 }

@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String NEW_CONTACT_IDENTITY = "com.example.myfirstapp.NEW_CONTACT_IDENTITY";
+    public static final String NEW_CONTACT_NICKNAME = "com.example.myfirstapp.NEW_CONTACT_NICKNAME";
     public static final int NEW_CONTACT_REQUEST_CODE = 0;
     public static final int SETTINGS_REQUEST_CODE = 1;
 
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         for (Contact contact: database.contactDao().getAll()) {
-            navigationView.getMenu().add(R.id.contacts_group, 0, 0, contact.getIdentity());
+            addContactItem(contact.getIdentity(), contact.getNickname());
             makeIntent("discover", contact.getIdentity());
         }
 
@@ -107,12 +108,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         settings = getSharedPreferences("distnet", 0);
-        String identity = settings.getString("identity", "");
-        if (identity.length() == 0) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivityForResult(intent, SETTINGS_REQUEST_CODE);
-        }
-
         String currentContact = settings.getString("currentContact", "");
         if (currentContact.length() != 0) {
             switchContact(currentContact);
@@ -165,7 +160,8 @@ public class MainActivity extends AppCompatActivity
         int gid = item.getGroupId();
 
         if (gid == R.id.contacts_group) {
-            switchContact(item.getTitle().toString());
+            System.out.println(item.getContentDescription());
+            switchContact(item.getContentDescription().toString());
         } else if (id == R.id.add_contact) {
             Intent intent = new Intent(this, NewContactActivity.class);
             startActivityForResult(intent, NEW_CONTACT_REQUEST_CODE);
@@ -179,30 +175,38 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void switchContact(String contact) {
-        setTitle(contact);
-        messageAdapter.setContact(contact);
+    public void switchContact(String identity) {
+        Contact contact = database.contactDao().getContact(identity);
+        if (contact == null)
+            return;
+        setTitle(contact.getNickname());
+        messageAdapter.setContact(identity);
 
-        makeIntent("discover", contact);
+        makeIntent("discover", identity);
 
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("currentContact", contact);
+        editor.putString("currentContact", identity);
         editor.apply();
+    }
+
+    public void addContactItem(String identity, String nickname) {
+        navigationView.getMenu().add(R.id.contacts_group, 0, 0, nickname).setContentDescription(identity);
     }
 
     @Override
     public void onActivityResult (int requestCode, int resultCode, Intent data) {
         if (requestCode == NEW_CONTACT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            String newContact = data.getStringExtra(NEW_CONTACT_IDENTITY);
-            if (database.contactDao().countIdentity(newContact) > 0)
+            String newIdentity = data.getStringExtra(NEW_CONTACT_IDENTITY);
+            String newNickname = data.getStringExtra(NEW_CONTACT_NICKNAME);
+            if (database.contactDao().countIdentity(newIdentity) > 0)
                 return;
-            database.contactDao().insertAll(new Contact(newContact));
+            database.contactDao().insertAll(new Contact(newIdentity, newNickname));
 
-            makeIntent("add_contact", newContact);
-            navigationView.getMenu().add(R.id.contacts_group, 0, 0, newContact);
-            makeIntent("discover", newContact);
+            makeIntent("add_contact", newIdentity);
+            addContactItem(newIdentity, newNickname);
+            makeIntent("discover", newIdentity);
 
-            switchContact(newContact);
+            switchContact(newIdentity);
         } else if (requestCode == SETTINGS_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             identity = settings.getString("identity", "");
             makeIntent("set_identity", identity);

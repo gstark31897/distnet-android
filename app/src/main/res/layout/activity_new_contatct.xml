@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_columnSpan="1"
-            android:text="@string/identity_input_label"/>
+            android:text="@string/nickname_input_label"/>
 
         <EditText
             android:layout_gravity="fill_horizontal"
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_columnSpan="1"
             android:inputType="textCapWords"
-            android:id="@+id/identity_input"/>
+            android:id="@+id/nickname_input"/>
 
         <Button
             android:layout_gravity="fill_horizontal"
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_columnSpan="2"
-            android:text="@string/identity_input_submit"
-            android:id="@+id/identity_submit" />
+            android:text="@string/contact_input_submit"
+            android:id="@+id/contact_submit" />
     </GridLayout>
 </android.support.constraint.ConstraintLayout>

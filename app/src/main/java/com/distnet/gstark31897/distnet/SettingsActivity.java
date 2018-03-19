@@ -1,6 +1,5 @@
 package com.distnet.gstark31897.distnet;
 
-import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,8 +18,8 @@ import java.util.ArrayList;
 
 public class SettingsActivity extends AppCompatActivity {
     String identity;
-    EditText identityInput;
-    Button identitySubmit;
+    EditText nicknameInput;
+    Button nicknameSubmit;
 
     InterfaceAdapter interfaceAdapter;
     EditText interfaceInput;
@@ -52,13 +51,15 @@ public class SettingsActivity extends AppCompatActivity {
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database")
                 .allowMainThreadQueries().fallbackToDestructiveMigration().build();
 
-        identityInput = (EditText) findViewById(R.id.identity_input);
-        identityInput.setText(settings.getString("identity", ""));
-        identitySubmit = (Button) findViewById(R.id.identity_submit);
-        identitySubmit.setOnClickListener(new View.OnClickListener() {
+        nicknameInput = (EditText) findViewById(R.id.nickname_input);
+        nicknameInput.setText(settings.getString("nickname", ""));
+        nicknameSubmit = (Button) findViewById(R.id.nickname_submit);
+        nicknameSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makeIntent("set_identity", identityInput.getText().toString());
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("nickname", nicknameInput.getText().toString());
+                editor.commit();
             }
         });
 
