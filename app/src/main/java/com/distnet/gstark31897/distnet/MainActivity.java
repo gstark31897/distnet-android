@@ -113,6 +113,15 @@ public class MainActivity extends AppCompatActivity
             switchContact(currentContact);
         }
 
+        if (!settings.getBoolean("started", false)) {
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean("started", true);
+            editor.apply();
+
+            Intent intent = new Intent(this, WelcomeActivity.class);
+            startActivity(intent);
+        }
+
         filter = new IntentFilter("com.distnet.gstark31897.distnet.SERVICE");
         receiver = new BroadcastReceiver() {
             @Override
