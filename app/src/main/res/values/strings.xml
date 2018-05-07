@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">distnet</string>
 
+    <string name="welcome">Welcome</string>
+    <string name="welcome_text">Welcome to distnet, the distributed networking, encrypted, messaging application.</string>
+    <string name="button_start">Start</string>
+
     <string name="new_contact_title">New Contact</string>
     <string name="share_contact_title">Share Contact</string>
     <string name="settings_title">Settings</string>
